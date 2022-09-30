@@ -12,6 +12,10 @@ resource "vsphere_virtual_machine" "server" {
   memory                 = each.value.system_memory
   memory_hot_add_enabled = true
   enable_disk_uuid = true
+
+  cdrom {
+    client_device = true
+  }
   
   vapp {
     properties = {

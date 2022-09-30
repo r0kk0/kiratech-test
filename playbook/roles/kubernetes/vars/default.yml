@@ -1,0 +1,13 @@
+
+---
+k8s_packages_list:
+  - kubelet
+  - kubeadm
+  - kubectl
+
+k8s_hold_list:
+  - kubelet
+  - kubeadm
+  - kubectl
+
+debian_version: jammy

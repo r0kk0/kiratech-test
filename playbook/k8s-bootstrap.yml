@@ -1,0 +1,10 @@
+---
+- name: k8s_all
+  hosts: k8s_all
+  gather_facts: true
+  become: true
+  roles:
+    - common
+    - containerd
+    - kubernetes
+    - kubernetes-bootstrap

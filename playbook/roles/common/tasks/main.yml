@@ -1,0 +1,41 @@
+---
+- name: Common | set variables
+  ansible.builtin.include_vars: '{{ item }}'
+  tags:
+    - common
+    - network
+    - packages
+    - auto-updates
+    - timezone
+    - swap
+  with_first_found:
+    - default.yml
+
+- name: Common | populate service facts
+  ansible.builtin.service_facts:
+  tags:
+    - common
+
+- name: Network
+  ansible.builtin.import_tasks: network.yml
+  tags:
+    - common
+    - network
+
+- name: Packages
+  ansible.builtin.import_tasks: packages.yml
+  tags:
+    - common
+    - packages
+
+- name: Timezone
+  ansible.builtin.import_tasks: timezone.yml
+  tags:
+    - common
+    - timezone
+
+- name: Swap
+  ansible.builtin.import_tasks: swap.yml
+  tags:
+    - common
+    - swap

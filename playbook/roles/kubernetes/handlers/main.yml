@@ -1,0 +1,24 @@
+- name: ContainerD | restart containerd
+  ansible.builtin.service:
+    name: '{{ containerd_service_name }}'
+    state: restarted
+  listen: restart containerd
+  tags:
+    - k8s
+
+- name: k8s | hold packages
+  ansible.builtin.dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  loop: '{{ k8s_hold_list }}'
+  listen: k8s_installed
+  tags:
+    - k8s
+
+- name: Enable kubelet service
+  ansible.builtin.service:
+    name: kubelet
+    enabled: yes
+  listen: k8s_installed
+  tags:
+    - k8s

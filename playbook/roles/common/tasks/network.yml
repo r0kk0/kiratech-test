@@ -1,0 +1,51 @@
+---
+- name: Network | update hostname
+  ansible.builtin.hostname:
+    name: '{{ inventory_hostname }}'
+  tags:
+    - common
+    - network
+  when: ansible_facts.hostname != inventory_hostname
+
+- name: Network | configure /etc/hosts
+  ansible.builtin.template:
+    src: etc/hosts.j2
+    dest: /etc/hosts
+    owner: root
+    group: '{{ main_root_group }}'
+    mode: '644'
+  tags:
+    - common
+    - network
+
+
+- name: Sysctl
+  ansible.builtin.copy:
+    src: etc/sysctl.d/k8s.conf
+    dest: /etc/sysctl.d/k8s.conf
+    owner: root
+    group: root
+    mode: '644'
+  tags:
+    - common
+    - sysctl
+
+- name: Modules Load
+  ansible.builtin.copy:
+    src: etc/modules-load.d/k8s.conf
+    dest: /etc/modules-load.d/k8s.conf
+    owner: root
+    group: root
+    mode: '644'
+  tags:
+    - common
+    - modules
+
+- name: Apply sysctl
+  ansible.builtin.shell: sysctl --system
+
+- name: Load module overlay
+  ansible.builtin.shell: modprobe overlay
+
+- name: Load module overlay
+  ansible.builtin.shell: modprobe br_netfilter

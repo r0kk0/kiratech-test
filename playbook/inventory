@@ -1,0 +1,13 @@
+[k8s_masters]
+master1 ansible_user=daniele
+
+[k8s_workers]
+node1 ansible_user=daniele
+node2 ansible_user=daniele
+
+[k8s_all:children]
+k8s_masters
+k8s_workers
+
+[k8s_all:vars]
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'

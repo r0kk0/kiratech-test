@@ -1,0 +1,7 @@
+
+---
+docker_engine_packages_list:
+  - containerd.io
+
+debian_version: jammy
+containerd_service_name: containerd

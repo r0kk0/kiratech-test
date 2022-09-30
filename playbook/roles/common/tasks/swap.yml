@@ -1,0 +1,7 @@
+- name: Disable SWAP 1
+  shell: |
+    sed -i '/swap/d' /etc/fstab
+
+- name: Disable SWAP 2
+  shell: |
+    swapoff -a

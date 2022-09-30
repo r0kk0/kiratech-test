@@ -1,0 +1,21 @@
+---
+timezone: Europe/Rome
+main_root_group: root
+main_packages_list:
+  - htop
+  - lsof
+  - net-tools
+  - screen
+  - strace
+  - telnet
+  - vim
+  - gpg
+  - rsync
+  - dnsutils
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gnupg
+  - lsb-release
+  - bash-completion
+  - nano

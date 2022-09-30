@@ -1,0 +1,7 @@
+- name: ContainerD | restart containerd
+  ansible.builtin.service:
+    name: '{{ containerd_service_name }}'
+    state: restarted
+  listen: restart containerd
+  tags:
+    - docker

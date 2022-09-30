@@ -1,0 +1,27 @@
+---
+- name: k8s | install key
+  ansible.builtin.copy:
+    src: usr/share/keyrings/k8s.gpg
+    dest: /usr/share/keyrings/k8s.gpg
+    owner: root
+    group: root
+    mode: '0644'
+  tags:
+    - k8s
+
+- name: k8s | add kube repo
+  ansible.builtin.apt_repository:
+    repo: deb [arch=amd64 signed-by=/usr/share/keyrings/k8s.gpg] https://apt.kubernetes.io/ kubernetes-xenial main
+    state: present
+    filename: k8s
+  tags:
+    - k8s
+
+- name: k8s | install k8s packages
+  ansible.builtin.package:
+    pkg: '{{ item }}'
+    state: present
+  loop: '{{ k8s_packages_list }}'
+  notify: k8s_installed
+  tags:
+    - k8s

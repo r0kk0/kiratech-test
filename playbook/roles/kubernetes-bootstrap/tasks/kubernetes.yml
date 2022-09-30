@@ -1,0 +1,152 @@
+---
+- name: load network modules
+  community.general.modprobe:
+    name: "overlay"
+    state: present
+
+- name: load network modules
+  community.general.modprobe:
+    name: "br_netfilter"
+    state: present
+
+- name: Kubernetes Worker | populate service facts
+  ansible.builtin.service_facts:
+  tags:
+    - kubernetes
+    - kubernetes-worker
+    - kubeadm
+  when:
+    - inventory_hostname in groups['k8s_workers']
+
+- name: Kubeadm | kubeadm init
+  ansible.builtin.command:
+    argv:
+      - kubeadm
+      - init
+      - --pod-network-cidr={{ kubernetes_pod_network_cidr }}
+    creates: /etc/kubernetes/manifests/kube-apiserver.yaml
+  tags:
+    - kubernetes
+    - kubernetes-controller
+    - kubeadm
+  when:
+    - inventory_hostname in groups['k8s_masters']
+
+- name: Kubeadm | create join token
+  ansible.builtin.command:
+    argv:
+      - kubeadm
+      - token
+      - create
+      - --print-join-command
+      - --description='Generated for Masters'
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  register: kubernetes_join_token_cmd
+  tags:
+    - kubernetes
+    - kubernetes-controller
+    - kubeadm
+  when:
+    - inventory_hostname in groups['k8s_masters']
+
+- name: Kubeadm | store join token
+  ansible.builtin.add_host:
+    name: k8s-dummy-host
+    token_cmd: '{{ kubernetes_join_token_cmd.stdout }}'
+  tags:
+    - kubernetes
+    - kubernetes-controller
+    - kubeadm
+  when:
+    - inventory_hostname in groups['k8s_masters']
+
+
+- name: Kubeadm | create join token
+  ansible.builtin.command:
+    argv:
+      - kubeadm
+      - token
+      - create
+      - --print-join-command
+      - --description
+      - 'Generated for workers'
+  delegate_to: "{{ groups['k8s_masters'][0] }}"
+  run_once: true
+  register: kubernetes_join_token_cmd
+  tags:
+    - kubernetes
+    - kubernetes-worker
+    - kubeadm
+  when:
+    - inventory_hostname in groups['k8s_workers']
+
+- name: Kubeadm | store join token
+  ansible.builtin.add_host:
+    name: k8s-dummy-host
+    token_cmd: '{{ kubernetes_join_token_cmd.stdout }}'
+  tags:
+    - kubernetes
+    - kubernetes-worker
+    - kubeadm
+  when:
+    - inventory_hostname in groups['k8s_workers']
+
+- name: Kubeadm | join workers
+  ansible.builtin.command:
+    cmd: "{{ hostvars['k8s-dummy-host']['token_cmd'] }}"
+  tags:
+    - kubernetes
+    - kubernetes-worker
+    - kubeadm
+  when:
+    - inventory_hostname in groups['k8s_workers']
+    - ansible_facts['services']['kubelet.service']['state'] == 'stopped'
+
+- name: Copy admin.conf to .
+  ansible.builtin.fetch:
+    src: /etc/kubernetes/admin.conf
+    dest: admin.conf
+    flat: yes
+  when:
+    - inventory_hostname in groups['k8s_masters']
+
+- name: Kubectl | flannel check
+  ansible.builtin.command:
+    argv:
+      - kubectl
+      - get
+      - ds
+      - -n
+      - kube-flannel
+      - -o
+      - name
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  delegate_to: "{{ groups['k8s_masters'][0] }}"
+  register: flannel_check
+  tags:
+    - kubernetes
+    - kubernetes-controller
+    - kubeadm
+  when:
+    - inventory_hostname in groups['k8s_masters']
+
+- name: Kubectl | flannel install
+  ansible.builtin.command:
+    argv:
+      - kubectl
+      - apply
+      - -f
+      - https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  delegate_to: "{{ groups['k8s_masters'][0] }}"
+  tags:
+    - kubernetes
+    - kubernetes-controller
+    - kubeadm
+  when:
+    - inventory_hostname in groups['k8s_masters']
+    - flannel_check.stdout != 'daemonset.apps/kube-flannel-ds'
+

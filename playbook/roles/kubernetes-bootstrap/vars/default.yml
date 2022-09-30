@@ -1,0 +1,7 @@
+
+---
+debian_version: jammy
+kubernetes_pod_network_cidr: "10.244.0.0/16"
+module_name_list:
+  - overlay
+  - br_netfilter

@@ -1,0 +1,11 @@
+---
+- name: Apply sysctl
+  shell: |
+    sysctl --system
+  listen: apply sysctl
+
+- name: Load modules
+  shell: |
+    modprobe overlay
+    modprobe br_netfilter
+  listen: load modules

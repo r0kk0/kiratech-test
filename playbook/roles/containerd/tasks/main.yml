@@ -1,0 +1,17 @@
+---
+- name: Docker | set variables
+  ansible.builtin.include_vars: '{{ item }}'
+  tags:
+    - docker
+  with_first_found:
+    - default.yml
+
+- name: Docker
+  ansible.builtin.include_tasks: docker.yml
+  tags:
+    - docker
+
+- name: Docker | flush handlers
+  ansible.builtin.meta: flush_handlers
+  tags:
+    - docker

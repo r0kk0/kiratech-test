@@ -32,11 +32,17 @@ data "template_cloudinit_config" "configurazione" {
       #cloud-config
       users:
         - name: ${each.value.username}
-          passwd: ${each.value.password}
+          password: ${var.sshpassword}
+          sudo: ALL=(ALL) NOPASSWD:ALL
           shell: /bin/bash
           lock_passwd: false
           ssh-authorized-keys:
             - ${var.sshkey}
+      disable_root: true
+      chpasswd:
+        list: |
+          ${each.value.username}:${var.sshpassword}
+        expire: False
       system_info:
         default_user:
         name: ${each.value.username}

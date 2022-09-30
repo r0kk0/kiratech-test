@@ -31,6 +31,11 @@ variable "virtual_machines" {
     system_ipv4_gateway     = string
     system_ipv4_netmask     = number
     username                = string
-    password                = string
   }))
+}
+
+variable "sshpassword" {
+  description = "SSH password"
+  type        = string
+  sensitive   = true
 }
