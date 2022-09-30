@@ -54,3 +54,49 @@ resource "vsphere_virtual_machine" "server" {
   }
 }
 
+resource "null_resource" ansible {
+
+  provisioner "local-exec" {
+    command = "ansible-playbook -i playbook/inventory playbook/k8s-bootstrap.yml" 
+  }
+
+  depends_on = [
+    vsphere_virtual_machine.server
+  ]
+}
+
+
+resource "kubernetes_namespace" "kiratechtest" {
+  metadata {
+    name = "kiratech-test"
+  }
+  depends_on = [
+    null_resource.ansible
+  ]
+}
+
+resource "null_resource" labels {
+
+  provisioner "local-exec" {
+    command = "KUBECONFIG=./playbook/admin.conf kubectl label node node1 node-role.kubernetes.io/worker=worker"
+  }
+
+  provisioner "local-exec" {
+    command = "KUBECONFIG=./playbook/admin.conf kubectl label node node2 node-role.kubernetes.io/worker=worker"
+  }
+
+  depends_on = [
+    null_resource.ansible
+  ]
+}
+
+resource "null_resource" kubebench {
+
+  provisioner "local-exec" {
+    command = "KUBECONFIG=./playbook/admin.conf kubectl apply -f kube-bench.yml"
+  }
+
+  depends_on = [
+    null_resource.ansible
+  ]
+}
