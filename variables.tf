@@ -16,6 +16,11 @@ variable "vsphere_password" {
   sensitive   = true
 }
 
+variable "sshkey" {
+  description = "Public ssh key (usually id_rsa.pub)"
+  type        = string
+  sensitive   = true
+}
 
 variable "virtual_machines" {
   type = map(object({
@@ -25,5 +30,7 @@ variable "virtual_machines" {
     system_ipv4_address     = string
     system_ipv4_gateway     = string
     system_ipv4_netmask     = number
+    username                = string
+    password                = string
   }))
 }

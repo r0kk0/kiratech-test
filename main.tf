@@ -11,6 +11,16 @@ resource "vsphere_virtual_machine" "server" {
   cpu_hot_remove_enabled = true
   memory                 = each.value.system_memory
   memory_hot_add_enabled = true
+  enable_disk_uuid = true
+  
+  vapp {
+    properties = {
+      "instance-id" = each.key
+      "hostname"    = each.key
+      "user-data"   = data.template_cloudinit_config.configurazione[each.key].rendered
+    }
+  }
+
   network_interface {
     network_id   = data.vsphere_network.network.id
   }
