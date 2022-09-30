@@ -36,3 +36,4 @@ secrets.tfvars
 .terraform.lock.hcl
 *.out
 python-venv/
+*.plan
