@@ -16,3 +16,7 @@ Verrà lanciato anche un benchmark di security (kube-bench).
 Nota: per eseguire il benchmark e altre operazioni su k8s è necessario avere kubectl nella $PATH di sistema.
 
 La scelta deriva dal fatto che vengono eseguiti i benchmark del CIS (https://www.cisecurity.org/benchmark/kubernetes)
+
+Nel cluster verrà provisionata una StorageClass di tipo NFS che si appoggia a un nas esterno.
+
+L'applicazione scelta per il deploy con Helm è Wordpress, con mariadb e memcached abilitati.

@@ -1,0 +1,26 @@
+NAME                                       READY   STATUS    RESTARTS        AGE
+pod/wordpress-579588667-29wl9              1/1     Running   1 (2m55s ago)   6m55s
+pod/wordpress-579588667-lpdlp              1/1     Running   2 (71s ago)     6m55s
+pod/wordpress-579588667-pgl7d              1/1     Running   2 (2m56s ago)   6m55s
+pod/wordpress-579588667-srmjb              1/1     Running   2 (3m3s ago)    6m55s
+pod/wordpress-mariadb-primary-0            1/1     Running   0               6m55s
+pod/wordpress-mariadb-secondary-0          1/1     Running   0               6m55s
+pod/wordpress-memcached-5b95545dd7-2fcqw   1/1     Running   0               6m55s
+
+NAME                                  TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                      AGE
+service/wordpress                     NodePort    10.110.184.207   <none>        80:30000/TCP,443:30001/TCP   6m55s
+service/wordpress-mariadb-primary     ClusterIP   10.108.41.230    <none>        3306/TCP                     6m55s
+service/wordpress-mariadb-secondary   ClusterIP   10.98.36.77      <none>        3306/TCP                     6m55s
+service/wordpress-memcached           ClusterIP   10.99.187.99     <none>        11211/TCP                    6m55s
+
+NAME                                  READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/wordpress             4/4     4            4           6m55s
+deployment.apps/wordpress-memcached   1/1     1            1           6m55s
+
+NAME                                             DESIRED   CURRENT   READY   AGE
+replicaset.apps/wordpress-579588667              4         4         4       6m55s
+replicaset.apps/wordpress-memcached-5b95545dd7   1         1         1       6m55s
+
+NAME                                           READY   AGE
+statefulset.apps/wordpress-mariadb-primary     1/1     6m55s
+statefulset.apps/wordpress-mariadb-secondary   1/1     6m55s
