@@ -66,10 +66,12 @@ resource "null_resource" ansible {
 }
 
 
-resource "kubernetes_namespace" "kiratechtest" {
-  metadata {
-    name = "kiratech-test"
+resource "null_resource" kiratechtest {
+
+  provisioner "local-exec" {
+    command = "KUBECONFIG=./playbook/admin.conf kubectl create namespace kiratech-test"
   }
+
   depends_on = [
     null_resource.ansible
   ]

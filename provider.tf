@@ -5,9 +5,3 @@ provider "vsphere" {
 
     allow_unverified_ssl = true
 }
-
-provider "kubernetes" {
-  config_path    = "playbook/admin.conf"
-  config_context = "kubernetes-admin@kubernetes"
-  insecure = true
-}
