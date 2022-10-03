@@ -1,0 +1,7 @@
+
+---
+haproxy_packages_list:
+  - haproxy
+
+debian_version: jammy
+haproxy_service_name: haproxy

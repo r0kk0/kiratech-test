@@ -24,6 +24,9 @@ variable "sshkey" {
 
 variable "virtual_machines" {
   type = map(object({
+    is_master               = bool
+    is_proxy                = bool
+    vm_name                 = string
     system_cores            = number
     system_cores_per_socket = number
     system_memory           = number

@@ -9,21 +9,43 @@
     name: "br_netfilter"
     state: present
 
-- name: Kubernetes Worker | populate service facts
+- name: Kubernetes | populate service facts
   ansible.builtin.service_facts:
   tags:
     - kubernetes
     - kubernetes-worker
     - kubeadm
+
+
+- name: Kubeadm | generate certificate key for Masters
+  ansible.builtin.command:
+    argv:
+      - kubeadm
+      - certs
+      - certificate-key
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  delegate_to: "{{ groups['k8s_masters'][0] }}"
+  register: kubernetes_join_certificate_key
+  tags:
+    - kubernetes
+    - kubernetes-controller
+    - kubeadm
   when:
-    - inventory_hostname in groups['k8s_workers']
+    - inventory_hostname in groups['k8s_masters']
+    - inventory_hostname == groups['k8s_masters'][0]
 
 - name: Kubeadm | kubeadm init
   ansible.builtin.command:
     argv:
       - kubeadm
       - init
+      - --control-plane-endpoint={{hostvars[groups['haproxy'][0]].ansible_host}}:6443
+      - --apiserver-advertise-address={{hostvars[groups['k8s_masters'][0]].ansible_host}}
       - --pod-network-cidr={{ kubernetes_pod_network_cidr }}
+      - --upload-certs
+      - --certificate-key
+      - '{{ kubernetes_join_certificate_key.stdout }}'
     creates: /etc/kubernetes/manifests/kube-apiserver.yaml
   tags:
     - kubernetes
@@ -31,29 +53,35 @@
     - kubeadm
   when:
     - inventory_hostname in groups['k8s_masters']
+    - inventory_hostname == groups['k8s_masters'][0]
 
-- name: Kubeadm | create join token
+
+- name: Kubeadm | create join token for masters
   ansible.builtin.command:
     argv:
       - kubeadm
       - token
       - create
       - --print-join-command
+      - --certificate-key
+      - '{{ kubernetes_join_certificate_key.stdout }}'
       - --description='Generated for Masters'
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
-  register: kubernetes_join_token_cmd
+  delegate_to: "{{ groups['k8s_masters'][0] }}"
+  register: kubernetes_master_join_token_cmd
   tags:
     - kubernetes
     - kubernetes-controller
     - kubeadm
   when:
     - inventory_hostname in groups['k8s_masters']
+    - inventory_hostname == groups['k8s_masters'][0]
 
 - name: Kubeadm | store join token
   ansible.builtin.add_host:
     name: k8s-dummy-host
-    token_cmd: '{{ kubernetes_join_token_cmd.stdout }}'
+    token_cmd: '{{ kubernetes_master_join_token_cmd.stdout }}'
   tags:
     - kubernetes
     - kubernetes-controller
@@ -61,6 +89,17 @@
   when:
     - inventory_hostname in groups['k8s_masters']
 
+- name: Kubeadm | join additional masters
+  ansible.builtin.command:
+    cmd: "{{ hostvars['k8s-dummy-host']['token_cmd'] }}"
+  tags:
+    - kubernetes
+    - kubernetes-worker
+    - kubeadm
+  when:
+    - inventory_hostname in groups['k8s_masters']
+    - inventory_hostname != groups['k8s_masters'][0]
+    - ansible_facts['services']['kubelet.service']['state'] == 'stopped'
 
 - name: Kubeadm | create join token
   ansible.builtin.command:
@@ -79,22 +118,22 @@
     - kubernetes-worker
     - kubeadm
   when:
-    - inventory_hostname in groups['k8s_workers']
+    - inventory_hostname in groups['k8s_masters']
 
 - name: Kubeadm | store join token
   ansible.builtin.add_host:
-    name: k8s-dummy-host
+    name: k8s-dummy-host-workers
     token_cmd: '{{ kubernetes_join_token_cmd.stdout }}'
   tags:
     - kubernetes
     - kubernetes-worker
     - kubeadm
   when:
-    - inventory_hostname in groups['k8s_workers']
+    - inventory_hostname in groups['k8s_masters']
 
 - name: Kubeadm | join workers
   ansible.builtin.command:
-    cmd: "{{ hostvars['k8s-dummy-host']['token_cmd'] }}"
+    cmd: "{{ hostvars['k8s-dummy-host-workers']['token_cmd'] }}"
   tags:
     - kubernetes
     - kubernetes-worker

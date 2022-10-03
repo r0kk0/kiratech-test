@@ -1,4 +1,12 @@
 ---
+- name: haproxy
+  hosts: haproxy
+  gather_facts: true
+  become: true
+  roles:
+    - common
+    - haproxy
+
 - name: k8s_all
   hosts: k8s_all
   gather_facts: true

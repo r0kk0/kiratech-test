@@ -1,9 +1,9 @@
 [k8s_masters]
-master1 ansible_user=daniele
+master1
 
 [k8s_workers]
-node1 ansible_user=daniele
-node2 ansible_user=daniele
+node1
+node2
 
 [k8s_all:children]
 k8s_masters

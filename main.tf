@@ -1,7 +1,37 @@
+resource "local_file" hostvar {
+  for_each = var.virtual_machines
+  content = templatefile("templates/hostvar.tpl",
+  {
+    ip_address = each.value.system_ipv4_address,
+    username = each.value.username
+  }
+  )
+  filename = "playbook/host_vars/${each.value.vm_name}.yml"
+}
+
+resource "local_file" ansibleinventory {
+  content = templatefile("templates/inventory.tpl",
+  {
+    vms = var.virtual_machines
+  }
+  )
+  filename = "playbook/inventory"
+}
+
+resource "local_file" haproxycfg {
+  content = templatefile("templates/haproxy.tpl",
+  {
+    vms = var.virtual_machines
+  }
+  )
+  filename = "playbook/roles/haproxy/files/etc/haproxy/haproxy.cfg"
+}
+
+
 resource "vsphere_virtual_machine" "server" {
   for_each = var.virtual_machines
 
-  name             = each.key
+  name             = each.value.vm_name
   resource_pool_id = data.vsphere_compute_cluster.cluster.resource_pool_id
   datastore_id     = data.vsphere_datastore.datastore.id
   guest_id         = "ubuntu64Guest"
@@ -19,8 +49,8 @@ resource "vsphere_virtual_machine" "server" {
   
   vapp {
     properties = {
-      "instance-id" = each.key
-      "hostname"    = each.key
+      "instance-id" = each.value.vm_name
+      "hostname"    = each.value.vm_name
       "user-data"   = data.template_cloudinit_config.configurazione[each.key].rendered
     }
   }

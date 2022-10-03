@@ -1,0 +1,19 @@
+---
+- name: HAproxy | install haproxy packages
+  ansible.builtin.package:
+    pkg: '{{ item }}'
+    state: present
+  loop: '{{ haproxy_packages_list }}'
+  tags:
+    - haproxy
+
+- name: haproxy | configure /etc/haproxy/haproxy.cfg
+  ansible.builtin.copy:
+    src: etc/haproxy/haproxy.cfg
+    dest: /etc/haproxy/haproxy.cfg
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart haproxy
+  tags:
+    - haproxy

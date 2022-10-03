@@ -1,0 +1,7 @@
+- name: haproxy | restart haproxy
+  ansible.builtin.service:
+    name: '{{ haproxy_service_name }}'
+    state: restarted
+  listen: restart haproxy
+  tags:
+    - haproxy

@@ -1,0 +1,17 @@
+---
+- name: Haproxy | set variables
+  ansible.builtin.include_vars: '{{ item }}'
+  tags:
+    - haproxy
+  with_first_found:
+    - default.yml
+
+- name: Haproxy
+  ansible.builtin.include_tasks: haproxy.yml
+  tags:
+    - haproxy
+
+- name: haproxy | flush handlers
+  ansible.builtin.meta: flush_handlers
+  tags:
+    - haproxy
