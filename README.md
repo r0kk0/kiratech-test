@@ -1,5 +1,8 @@
 # kiratech-test
 
+## WIP - Dev Branch
+Branch di sviluppo, fatto un po di refactoring generale, aggiunto il deploy del cluster in HA (piu nodi master) e una macchina haproxy necessaria per il deploy in HA.
+
 Le macchine virtuali verranno provisionate su un cluster ESXi VMware (homeLab)
 
 

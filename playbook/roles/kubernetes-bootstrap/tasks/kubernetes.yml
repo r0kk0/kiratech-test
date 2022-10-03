@@ -162,7 +162,7 @@
       - name
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
-  delegate_to: "{{ groups['k8s_masters'][0] }}"
+  run_once: true
   register: flannel_check
   tags:
     - kubernetes
@@ -180,7 +180,7 @@
       - https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
-  delegate_to: "{{ groups['k8s_masters'][0] }}"
+  run_once: true
   tags:
     - kubernetes
     - kubernetes-controller
@@ -188,4 +188,3 @@
   when:
     - inventory_hostname in groups['k8s_masters']
     - flannel_check.stdout != 'daemonset.apps/kube-flannel-ds'
-
